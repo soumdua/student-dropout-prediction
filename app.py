@@ -56,9 +56,9 @@ with tab2:
 
     st.subheader("Correlation Heatmap")
 
-    fig, ax = plt.subplots(figsize=(10,6))
-    sns.heatmap(df.corr(include='number'), cmap="coolwarm", ax=ax)
-    st.pyplot(fig)
+	fig, ax = plt.subplots(figsize=(10,6))
+	sns.heatmap(df.corr(numeric_only=True), cmap="coolwarm", ax=ax)
+	st.pyplot(fig)
 
 with tab3:
 
