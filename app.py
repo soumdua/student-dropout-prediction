@@ -13,11 +13,8 @@ st.title("Student Dropout Prediction Dashboard")
 # Load dataset
 df = pd.read_csv("student_dropout_dataset_v3.csv")
 
-# Create encoded version for modeling and SHAP
-df_encoded = df.copy()
-
-for col in df_encoded.select_dtypes(include="object").columns:
-    df_encoded[col] = pd.factorize(df_encoded[col])[0]
+# Encode categorical variables
+df_encoded = pd.get_dummies(df, drop_first=True)
 
 # Load trained model
 model = joblib.load("logistic_model.pkl")
@@ -30,7 +27,12 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "Explainability & Prediction"
 ])
 
+# ---------------------------------------------------
+# TAB 1 — EXECUTIVE SUMMARY
+# ---------------------------------------------------
+
 with tab1:
+
     st.header("Executive Summary")
 
     st.write("""
@@ -49,6 +51,10 @@ with tab1:
     st.write("Dataset shape:", df.shape)
 
 
+# ---------------------------------------------------
+# TAB 2 — DESCRIPTIVE ANALYTICS
+# ---------------------------------------------------
+
 with tab2:
 
     st.header("Descriptive Analytics")
@@ -63,8 +69,14 @@ with tab2:
     st.subheader("Correlation Heatmap")
 
     fig, ax = plt.subplots(figsize=(10,6))
-    sns.heatmap(df.select_dtypes(include="number").corr(), cmap="coolwarm", ax=ax)
+    sns.heatmap(df_encoded.select_dtypes(include=np.number).corr(),
+                cmap="coolwarm", ax=ax)
     st.pyplot(fig)
+
+
+# ---------------------------------------------------
+# TAB 3 — MODEL PERFORMANCE
+# ---------------------------------------------------
 
 with tab3:
 
@@ -82,17 +94,20 @@ with tab3:
     ax.set_title("Model Comparison")
     st.pyplot(fig)
 
+
+# ---------------------------------------------------
+# TAB 4 — EXPLAINABILITY & PREDICTION
+# ---------------------------------------------------
+
 with tab4:
 
     st.header("Explainability & Interactive Prediction")
 
     st.subheader("SHAP Feature Importance")
 
-    # Get the exact features used during training
+    # Align dataset with model features
     feature_names = model.feature_names_in_
-
-    # Create dataframe with only those columns
-    X = df_encoded[feature_names]
+    X = df_encoded.reindex(columns=feature_names, fill_value=0)
 
     # SHAP explainer
     explainer = shap.LinearExplainer(model, X)
@@ -104,6 +119,7 @@ with tab4:
 
     st.subheader("Interactive Prediction")
 
+    # User inputs
     gender = st.selectbox("Gender", ["Male", "Female"])
     internet = st.selectbox("Internet Access", ["Yes", "No"])
     job = st.selectbox("Part Time Job", ["Yes", "No"])
@@ -113,6 +129,7 @@ with tab4:
     study_hours = st.slider("Study Hours per Day", 0, 10, 4)
     attendance = st.slider("Attendance (%)", 0, 100, 75)
 
+    # Encode inputs
     gender = 1 if gender == "Male" else 0
     internet = 1 if internet == "Yes" else 0
     job = 1 if job == "Yes" else 0
@@ -127,6 +144,9 @@ with tab4:
         "StudyHours":[study_hours],
         "Attendance":[attendance]
     })
+
+    # Align with model features
+    input_data = input_data.reindex(columns=feature_names, fill_value=0)
 
     if st.button("Predict"):
 
