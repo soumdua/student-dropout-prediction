@@ -66,19 +66,80 @@ with tab2:
 
     st.header("Descriptive Analytics")
 
-    st.subheader("Target Distribution")
+    # -----------------------------
+    # Target Distribution
+    # -----------------------------
+    st.subheader("Dropout Distribution")
 
     fig, ax = plt.subplots()
     df["Dropout"].value_counts().plot(kind="bar", ax=ax)
+    ax.set_title("Distribution of Student Dropout")
+    ax.set_xlabel("Dropout")
+    ax.set_ylabel("Count")
     st.pyplot(fig)
 
+    st.write("This plot shows how many students dropped out versus stayed enrolled.")
+
+    # -----------------------------
+    # GPA vs Dropout
+    # -----------------------------
+    st.subheader("GPA vs Dropout")
+
+    fig, ax = plt.subplots()
+    sns.boxplot(x="Dropout", y="GPA", data=df, ax=ax)
+    ax.set_title("GPA Distribution by Dropout Status")
+    st.pyplot(fig)
+
+    st.write("Students with lower GPA appear more likely to drop out.")
+
+    # -----------------------------
+    # Attendance vs Dropout
+    # -----------------------------
+    st.subheader("Attendance Rate vs Dropout")
+
+    fig, ax = plt.subplots()
+    sns.boxplot(x="Dropout", y="Attendance_Rate", data=df, ax=ax)
+    ax.set_title("Attendance Rate by Dropout Status")
+    st.pyplot(fig)
+
+    st.write("Students with lower attendance rates show higher dropout probability.")
+
+    # -----------------------------
+    # Study Hours vs Dropout
+    # -----------------------------
+    st.subheader("Study Hours per Day vs Dropout")
+
+    fig, ax = plt.subplots()
+    sns.boxplot(x="Dropout", y="Study_Hours_per_Day", data=df, ax=ax)
+    ax.set_title("Study Hours by Dropout Status")
+    st.pyplot(fig)
+
+    st.write("Students studying fewer hours per day tend to drop out more frequently.")
+
+    # -----------------------------
+    # Stress Index vs Dropout
+    # -----------------------------
+    st.subheader("Stress Index vs Dropout")
+
+    fig, ax = plt.subplots()
+    sns.boxplot(x="Dropout", y="Stress_Index", data=df, ax=ax)
+    ax.set_title("Stress Index by Dropout Status")
+    st.pyplot(fig)
+
+    st.write("Higher stress levels may be associated with higher dropout risk.")
+
+    # -----------------------------
+    # Correlation Heatmap
+    # -----------------------------
     st.subheader("Correlation Heatmap")
 
     fig, ax = plt.subplots(figsize=(10,6))
-    sns.heatmap(df.select_dtypes("number").corr(), cmap="coolwarm", ax=ax)
+    sns.heatmap(df.select_dtypes("number").corr(),
+                cmap="coolwarm",
+                ax=ax)
     st.pyplot(fig)
 
-
+    st.write("This heatmap shows relationships between numerical variables in the dataset.")
 # -----------------------
 # TAB 3
 # -----------------------
