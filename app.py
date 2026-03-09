@@ -94,30 +94,29 @@ with tab4:
 
     st.subheader("Interactive Prediction")
 
-   st.subheader("Interactive Prediction")
+    gender = st.selectbox("Gender", ["Male", "Female"])
+    internet = st.selectbox("Internet Access", ["Yes", "No"])
+    job = st.selectbox("Part Time Job", ["Yes", "No"])
+    scholarship = st.selectbox("Scholarship", ["Yes", "No"])
 
-gender = st.selectbox("Gender", ["Male", "Female"])
-internet = st.selectbox("Internet Access", ["Yes", "No"])
-job = st.selectbox("Part Time Job", ["Yes", "No"])
-scholarship = st.selectbox("Scholarship", ["Yes", "No"])
+    age = st.slider("Age", 18, 40, 22)
+    study_hours = st.slider("Study Hours per Day", 0, 10, 4)
+    attendance = st.slider("Attendance (%)", 0, 100, 75)
 
-age = st.slider("Age", 18, 40, 22)
-study_hours = st.slider("Study Hours per Day", 0, 10, 4)
-attendance = st.slider("Attendance (%)", 0, 100, 75)
-gender = 1 if gender == "Male" else 0
-internet = 1 if internet == "Yes" else 0
-job = 1 if job == "Yes" else 0
-scholarship = 1 if scholarship == "Yes" else 0
+    gender = 1 if gender == "Male" else 0
+    internet = 1 if internet == "Yes" else 0
+    job = 1 if job == "Yes" else 0
+    scholarship = 1 if scholarship == "Yes" else 0
 
-input_data = pd.DataFrame({
-    "Gender":[gender],
-    "Internet_Access":[internet],
-    "Part_Time_Job":[job],
-    "Scholarship":[scholarship],
-    "Age":[age],
-    "StudyHours":[study_hours],
-    "Attendance":[attendance]
-})
+    input_data = pd.DataFrame({
+        "Gender":[gender],
+        "Internet_Access":[internet],
+        "Part_Time_Job":[job],
+        "Scholarship":[scholarship],
+        "Age":[age],
+        "StudyHours":[study_hours],
+        "Attendance":[attendance]
+    })
 
     if st.button("Predict"):
         prediction = model.predict(input_data)[0]
