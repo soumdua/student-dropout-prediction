@@ -233,36 +233,102 @@ with tab3:
 
 with tab4:
 
-    st.header("Model Explainability (SHAP)")
-    st.write("This section shows which features influence dropout prediction.")
+    st.header("Explainability & Interactive Prediction")
 
-    # Encode categorical variables
+    st.subheader("SHAP Feature Importance")
+
     df_encoded = pd.get_dummies(df)
 
-    # Features expected by the model
     feature_names = model.feature_names_in_
 
-    # Add missing columns that model expects
     for col in feature_names:
         if col not in df_encoded.columns:
             df_encoded[col] = 0
 
-    # Keep only model features
-    X = df_encoded[feature_names]
+    X = df_encoded[feature_names].astype(float)
 
-    # Convert to numeric values only
-    X = X.astype(float)
+    explainer = shap.LinearExplainer(model, X)
 
-    try:
-        explainer = shap.LinearExplainer(model, X)
+    shap_values = explainer(X)
 
-        shap_values = explainer(X)
+    fig = plt.figure()
+    shap.summary_plot(shap_values.values, X, show=False)
 
-        fig = plt.figure()
-        shap.summary_plot(shap_values.values, X, show=False)
+    st.pyplot(fig)
 
-        st.pyplot(fig)
+    st.write("""
+    The SHAP summary plot shows which features have the greatest impact on the model's predictions across the dataset. 
+    Each point represents a student observation, and the color indicates whether a feature value is high or low, helping explain how different factors influence dropout risk.
+    """)
 
-    except Exception as e:
-        st.error("SHAP visualization failed.")
-        st.write(e)
+
+    st.subheader("SHAP Feature Importance (Bar Plot)")
+
+    fig = plt.figure()
+    shap.plots.bar(shap_values, show=False)
+
+    st.pyplot(fig)
+
+    st.write("""
+    This bar chart ranks the most important features influencing the model's predictions. 
+    Features at the top of the chart have the strongest impact on predicting whether a student is likely to drop out.
+    """)
+
+
+    st.subheader("Interactive Prediction")
+
+    model_choice = st.selectbox(
+        "Select Model for Prediction",
+        ["Logistic Regression"]
+    )
+
+    age = st.slider("Age", int(df["Age"].min()), int(df["Age"].max()), int(df["Age"].mean()))
+
+    gender = st.selectbox("Gender", df["Gender"].unique())
+
+    semester = st.slider("Semester Year", 1, 4, 2)
+
+    study_hours = st.slider("Study Hours Per Week", 0, 40, 10)
+
+
+    input_dict = {
+        "Age": age,
+        "StudyHours": study_hours,
+    }
+
+    input_df = pd.DataFrame([input_dict])
+
+    input_df = pd.get_dummies(input_df)
+
+    for col in feature_names:
+        if col not in input_df.columns:
+            input_df[col] = 0
+
+    input_df = input_df[feature_names]
+
+    prediction = model.predict(input_df)[0]
+
+    probability = model.predict_proba(input_df)[0][1]
+
+    st.write("### Prediction Result")
+
+    if prediction == 1:
+        st.error(f"Predicted Outcome: Dropout Risk (Probability: {probability:.2f})")
+    else:
+        st.success(f"Predicted Outcome: Likely to Stay (Probability: {probability:.2f})")
+
+
+    st.subheader("SHAP Explanation for This Prediction")
+
+    user_shap = explainer(input_df)
+
+    fig = plt.figure()
+
+    shap.plots.waterfall(user_shap[0], show=False)
+
+    st.pyplot(fig)
+
+    st.write("""
+    The SHAP waterfall plot explains how each feature contributed to the model’s prediction for the selected student profile. 
+    Positive contributions increase the predicted dropout probability, while negative contributions decrease the risk.
+    """)
