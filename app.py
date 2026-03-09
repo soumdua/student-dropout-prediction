@@ -5,21 +5,51 @@ import joblib
 import shap
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
 
 st.set_page_config(page_title="Student Dropout Prediction", layout="wide")
 
 st.title("Student Dropout Prediction Dashboard")
 
-# Load dataset
+# -----------------------------
+# LOAD DATA
+# -----------------------------
+
 df = pd.read_csv("student_dropout_dataset_v3.csv")
 
-# Encode categorical variables
-df_encoded = pd.get_dummies(df, drop_first=True)
+# Drop ID like in notebook
+df = df.drop("Student_ID", axis=1)
 
-# Load trained model
+# Encode categorical columns
+categorical = [
+    "Gender",
+    "Internet_Access",
+    "Part_Time_Job",
+    "Scholarship",
+    "Department",
+    "Parental_Education"
+]
+
+encoders = {}
+
+for col in categorical:
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+    encoders[col] = le
+
+# -----------------------------
+# LOAD MODEL
+# -----------------------------
+
 model = joblib.load("logistic_model.pkl")
 
-# Tabs
+X = df.drop("Dropout", axis=1)
+y = df["Dropout"]
+
+# -----------------------------
+# TABS
+# -----------------------------
+
 tab1, tab2, tab3, tab4 = st.tabs([
     "Executive Summary",
     "Descriptive Analytics",
@@ -27,33 +57,30 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "Explainability & Prediction"
 ])
 
-# ---------------------------------------------------
-# TAB 1 — EXECUTIVE SUMMARY
-# ---------------------------------------------------
+# -----------------------------
+# TAB 1
+# -----------------------------
 
 with tab1:
 
     st.header("Executive Summary")
 
     st.write("""
-    This project predicts whether a student will drop out based on academic,
-    behavioral, and demographic characteristics.
+    This project predicts student dropout risk using academic, behavioral,
+    and demographic information.
 
-    Early identification of at-risk students allows universities to intervene
-    earlier and improve retention outcomes.
+    Universities can use this model to identify at-risk students early
+    and provide support interventions before dropout occurs.
 
-    Multiple machine learning models were trained and compared including
-    Logistic Regression, Decision Tree, Random Forest, and Neural Networks.
-    The best-performing model was selected based on evaluation metrics such
-    as accuracy, precision, recall, F1-score, and ROC-AUC.
+    Multiple models were tested including Logistic Regression,
+    Decision Tree, Random Forest, and Neural Networks.
     """)
 
     st.write("Dataset shape:", df.shape)
 
-
-# ---------------------------------------------------
-# TAB 2 — DESCRIPTIVE ANALYTICS
-# ---------------------------------------------------
+# -----------------------------
+# TAB 2
+# -----------------------------
 
 with tab2:
 
@@ -63,20 +90,18 @@ with tab2:
 
     fig, ax = plt.subplots()
     df["Dropout"].value_counts().plot(kind="bar", ax=ax)
-    ax.set_title("Dropout Distribution")
+    ax.set_title("Student Dropout Distribution")
     st.pyplot(fig)
 
     st.subheader("Correlation Heatmap")
 
     fig, ax = plt.subplots(figsize=(10,6))
-    sns.heatmap(df_encoded.select_dtypes(include=np.number).corr(),
-                cmap="coolwarm", ax=ax)
+    sns.heatmap(df.corr(), cmap="coolwarm", ax=ax)
     st.pyplot(fig)
 
-
-# ---------------------------------------------------
-# TAB 3 — MODEL PERFORMANCE
-# ---------------------------------------------------
+# -----------------------------
+# TAB 3
+# -----------------------------
 
 with tab3:
 
@@ -84,32 +109,29 @@ with tab3:
 
     performance = pd.DataFrame({
         "Model":["Logistic Regression","Decision Tree","Random Forest","MLP"],
-        "F1 Score":[0.82,0.75,0.80,0.78]
+        "Accuracy":[0.84,0.78,0.82,0.80]
     })
 
     st.table(performance)
 
     fig, ax = plt.subplots()
-    sns.barplot(x="Model", y="F1 Score", data=performance, ax=ax)
-    ax.set_title("Model Comparison")
+    sns.barplot(x="Model", y="Accuracy", data=performance, ax=ax)
     st.pyplot(fig)
 
-
-# ---------------------------------------------------
-# TAB 4 — EXPLAINABILITY & PREDICTION
-# ---------------------------------------------------
+# -----------------------------
+# TAB 4
+# -----------------------------
 
 with tab4:
 
     st.header("Explainability & Interactive Prediction")
 
+    # -----------------------------
+    # SHAP
+    # -----------------------------
+
     st.subheader("SHAP Feature Importance")
 
-    # Align dataset with model features
-    feature_names = model.feature_names_in_
-    X = df_encoded.reindex(columns=feature_names, fill_value=0)
-
-    # SHAP explainer
     explainer = shap.LinearExplainer(model, X)
     shap_values = explainer(X)
 
@@ -117,41 +139,50 @@ with tab4:
     shap.summary_plot(shap_values.values, X, show=False)
     st.pyplot(fig)
 
+    # -----------------------------
+    # USER INPUTS
+    # -----------------------------
+
     st.subheader("Interactive Prediction")
 
-    # User inputs
-    gender = st.selectbox("Gender", ["Male", "Female"])
-    internet = st.selectbox("Internet Access", ["Yes", "No"])
-    job = st.selectbox("Part Time Job", ["Yes", "No"])
-    scholarship = st.selectbox("Scholarship", ["Yes", "No"])
+    age = st.slider("Age", 17, 40, 21)
+    gender = st.selectbox("Gender", ["Male","Female"])
+    income = st.slider("Family Income", 1000, 10000, 4000)
+    internet = st.selectbox("Internet Access", ["Yes","No"])
+    study = st.slider("Study Hours per Day", 0, 12, 4)
+    attendance = st.slider("Attendance Rate", 0, 100, 75)
+    delay = st.slider("Assignment Delay Days", 0, 10, 2)
+    travel = st.slider("Travel Time Minutes", 0, 120, 30)
+    job = st.selectbox("Part Time Job", ["Yes","No"])
+    scholarship = st.selectbox("Scholarship", ["Yes","No"])
+    stress = st.slider("Stress Index", 0, 10, 5)
+    gpa = st.slider("GPA", 0.0, 4.0, 3.0)
+    sem_gpa = st.slider("Semester GPA", 0.0, 4.0, 3.0)
+    cgpa = st.slider("CGPA", 0.0, 4.0, 3.0)
+    semester = st.slider("Semester", 1, 8, 4)
+    dept = st.selectbox("Department", df["Department"].unique())
+    parent_edu = st.selectbox("Parental Education", df["Parental_Education"].unique())
 
-    age = st.slider("Age", 18, 40, 22)
-    study_hours = st.slider("Study Hours per Day", 0, 10, 4)
-    attendance = st.slider("Attendance (%)", 0, 100, 75)
+    # Encode categorical inputs
+    gender = encoders["Gender"].transform([gender])[0]
+    internet = encoders["Internet_Access"].transform([internet])[0]
+    job = encoders["Part_Time_Job"].transform([job])[0]
+    scholarship = encoders["Scholarship"].transform([scholarship])[0]
+    dept = encoders["Department"].transform([dept])[0]
+    parent_edu = encoders["Parental_Education"].transform([parent_edu])[0]
 
-    # Encode inputs
-    gender = 1 if gender == "Male" else 0
-    internet = 1 if internet == "Yes" else 0
-    job = 1 if job == "Yes" else 0
-    scholarship = 1 if scholarship == "Yes" else 0
-
-    input_data = pd.DataFrame({
-        "Gender":[gender],
-        "Internet_Access":[internet],
-        "Part_Time_Job":[job],
-        "Scholarship":[scholarship],
-        "Age":[age],
-        "StudyHours":[study_hours],
-        "Attendance":[attendance]
-    })
-
-    # Align with model features
-    input_data = input_data.reindex(columns=feature_names, fill_value=0)
+    input_data = pd.DataFrame([[
+        age, gender, income, internet, study, attendance,
+        delay, travel, job, scholarship, stress,
+        gpa, sem_gpa, cgpa, semester, dept, parent_edu
+    ]], columns=X.columns)
 
     if st.button("Predict"):
 
         prediction = model.predict(input_data)[0]
         probability = model.predict_proba(input_data)[0][1]
 
-        st.write("Prediction:", prediction)
-        st.write("Dropout Probability:", round(probability,3))
+        if prediction == 1:
+            st.error(f"⚠️ High Dropout Risk ({probability:.2f})")
+        else:
+            st.success(f"✅ Low Dropout Risk ({probability:.2f})")
