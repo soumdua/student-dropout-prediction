@@ -88,8 +88,11 @@ with tab4:
 
     st.subheader("SHAP Feature Importance")
 
-    # Ensure we use the same features as training
-    X = df_encoded.drop(["Dropout", "Student_ID"], axis=1, errors="ignore")
+    # Get the exact features used during training
+    feature_names = model.feature_names_in_
+
+    # Create dataframe with only those columns
+    X = df_encoded[feature_names]
 
     # SHAP explainer
     explainer = shap.LinearExplainer(model, X)
@@ -101,7 +104,6 @@ with tab4:
 
     st.subheader("Interactive Prediction")
 
-    # User inputs
     gender = st.selectbox("Gender", ["Male", "Female"])
     internet = st.selectbox("Internet Access", ["Yes", "No"])
     job = st.selectbox("Part Time Job", ["Yes", "No"])
@@ -111,13 +113,11 @@ with tab4:
     study_hours = st.slider("Study Hours per Day", 0, 10, 4)
     attendance = st.slider("Attendance (%)", 0, 100, 75)
 
-    # Encode categorical variables
     gender = 1 if gender == "Male" else 0
     internet = 1 if internet == "Yes" else 0
     job = 1 if job == "Yes" else 0
     scholarship = 1 if scholarship == "Yes" else 0
 
-    # Create input dataframe with same features as training
     input_data = pd.DataFrame({
         "Gender":[gender],
         "Internet_Access":[internet],
