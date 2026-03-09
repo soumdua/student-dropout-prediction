@@ -166,34 +166,39 @@ with tab3:
 
 with tab4:
 
-    st.header("Explainability & Interactive Prediction")
+    st.header("Model Explainability (SHAP)")
 
-    st.subheader("SHAP Feature Importance")
+    st.write("This section explains which features most influence the dropout prediction.")
 
-    explainer = shap.LinearExplainer(model, X)
-    shap_values = explainer(X)
+    # Encode categorical variables
+    df_encoded = pd.get_dummies(df)
 
-    fig = plt.figure()
-    shap.summary_plot(shap_values.values, X, show=False)
-    st.pyplot(fig)
+    # Get features used by the trained model
+    feature_names = model.feature_names_in_
 
-    st.subheader("Interactive Prediction")
+    # Add missing columns if they do not exist
+    for col in feature_names:
+        if col not in df_encoded.columns:
+            df_encoded[col] = 0
 
-    # use dataset means as defaults
-    user_input = {}
+    # Keep only columns used by the model
+    X = df_encoded[feature_names]
 
-    for col in X.columns:
-        user_input[col] = st.number_input(
-            col,
-            value=float(X[col].mean())
-        )
+    try:
+        # Create SHAP explainer
+        explainer = shap.LinearExplainer(model, X)
 
-    input_df = pd.DataFrame([user_input])
+        # Calculate SHAP values
+        shap_values = explainer(X)
 
-    if st.button("Predict"):
+        # Create SHAP summary plot
+        fig = plt.figure()
+        shap.summary_plot(shap_values.values, X, show=False)
 
-        prediction = model.predict(input_df)[0]
-        probability = model.predict_proba(input_df)[0][1]
+        # Display in Streamlit
+        st.pyplot(fig)
 
-        st.write("Prediction:", prediction)
-        st.write("Dropout Probability:", round(probability,3))
+    except Exception as e:
+
+        st.error("SHAP visualization failed.")
+        st.write(e)
