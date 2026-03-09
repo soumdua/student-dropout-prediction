@@ -110,6 +110,10 @@ job = 1 if job == "Yes" else 0
 scholarship = 1 if scholarship == "Yes" else 0
 
 input_data = pd.DataFrame({
+    "Gender":[gender],
+    "Internet_Access":[internet],
+    "Part_Time_Job":[job],
+    "Scholarship":[scholarship],
     "Age":[age],
     "StudyHours":[study_hours],
     "Attendance":[attendance]
