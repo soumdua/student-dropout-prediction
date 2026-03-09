@@ -167,15 +167,15 @@ with tab3:
 with tab4:
 
     st.header("Model Explainability (SHAP)")
-    st.write("This section explains which features influence dropout prediction.")
+    st.write("This section shows which features influence dropout prediction.")
 
     # Encode categorical variables
     df_encoded = pd.get_dummies(df)
 
-    # Get features expected by the model
+    # Features expected by the model
     feature_names = model.feature_names_in_
 
-    # Add missing columns expected by model
+    # Add missing columns that model expects
     for col in feature_names:
         if col not in df_encoded.columns:
             df_encoded[col] = 0
@@ -183,15 +183,12 @@ with tab4:
     # Keep only model features
     X = df_encoded[feature_names]
 
-    # Convert everything to numeric
-    X = X.apply(pd.to_numeric, errors="coerce")
-
-    # Fill NaN values
-    X = X.fillna(0)
+    # Convert to numeric values only
+    X = X.astype(float)
 
     try:
-
         explainer = shap.LinearExplainer(model, X)
+
         shap_values = explainer(X)
 
         fig = plt.figure()
@@ -200,6 +197,5 @@ with tab4:
         st.pyplot(fig)
 
     except Exception as e:
-
         st.error("SHAP visualization failed.")
         st.write(e)
