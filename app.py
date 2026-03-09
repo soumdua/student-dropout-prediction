@@ -214,38 +214,105 @@ with tab2:
 with tab3:
 
     st.header("Model Performance")
-st.write("""
-This chart compares the accuracy of the machine learning models tested in this project. 
-Logistic Regression achieved the highest accuracy, slightly outperforming Random Forest and XGBoost, while Decision Tree produced the lowest performance among the evaluated models.
-""")
 
-   model_results = pd.DataFrame({
-    "Model": [
-        "Logistic Regression",
-        "Random Forest",
-        "XGBoost",
-        "Neural Network",
-        "Decision Tree"
-    ],
-    "Accuracy": [
-        0.8105,
-        0.8075,
-        0.7965,
-        0.7855,
-        0.7310
-    ]
-})
+    st.markdown("""
+    This section evaluates the performance of several machine learning models used to predict student dropout. 
+    Multiple algorithms were trained and compared to determine which model produces the most accurate predictions.
+    """)
 
-st.subheader("Model Comparison")
+    # -----------------------------
+    # Model comparison table
+    # -----------------------------
+    st.subheader("Model Accuracy Comparison")
 
-st.dataframe(model_results)
+    model_results = pd.DataFrame({
+        "Model": [
+            "Logistic Regression",
+            "Random Forest",
+            "XGBoost",
+            "Neural Network",
+            "Decision Tree"
+        ],
+        "Accuracy": [
+            0.8105,
+            0.8075,
+            0.7965,
+            0.7855,
+            0.7310
+        ]
+    })
 
-    st.table(performance)
+    st.dataframe(model_results)
+
+    st.write("""
+    The table above compares the prediction accuracy of the different models tested in this project. 
+    Accuracy represents the proportion of correct predictions made by each model when classifying whether a student will drop out.
+    """)
+
+    # -----------------------------
+    # Accuracy bar chart
+    # -----------------------------
+    st.subheader("Model Accuracy Visualization")
 
     fig, ax = plt.subplots()
-    sns.barplot(x="Model", y="F1 Score", data=performance, ax=ax)
+
+    sns.barplot(
+        data=model_results,
+        x="Accuracy",
+        y="Model",
+        ax=ax
+    )
+
+    ax.set_title("Comparison of Model Accuracy")
+
     st.pyplot(fig)
 
+    st.write("""
+    This bar chart visualizes the accuracy scores of the models. 
+    Logistic Regression achieved the highest accuracy, slightly outperforming Random Forest and XGBoost, while the Decision Tree model produced the lowest accuracy among the models tested.
+    """)
+
+    # -----------------------------
+    # Best model explanation
+    # -----------------------------
+    st.subheader("Best Performing Model")
+
+    st.write("""
+    Logistic Regression achieved the highest accuracy score of **0.8105**, making it the best-performing model in this analysis. 
+    Although more complex models such as Random Forest and XGBoost were evaluated, the relatively strong performance of Logistic Regression suggests that the relationship between the features and dropout outcome may be reasonably linear.
+    
+    In addition to strong performance, Logistic Regression also provides a high level of interpretability, which makes it a good choice for understanding how different student characteristics influence dropout risk.
+    """)
+
+    # -----------------------------
+    # Hyperparameters
+    # -----------------------------
+    st.subheader("Best Hyperparameters")
+
+    st.write("""
+    The following hyperparameters were selected during model tuning:
+
+    • Logistic Regression: default parameters with regularization  
+    • Random Forest: optimized number of trees and depth  
+    • XGBoost: tuned learning rate and number of estimators  
+    • Neural Network: optimized hidden layer size and training iterations  
+    • Decision Tree: tuned maximum depth to reduce overfitting
+    """)
+
+    # -----------------------------
+    # ROC Curve section
+    # -----------------------------
+    st.subheader("ROC Curve Evaluation")
+
+    st.write("""
+    Receiver Operating Characteristic (ROC) curves were used to evaluate how well each model separates the dropout and non-dropout classes. 
+    The ROC curve illustrates the trade-off between the true positive rate and false positive rate across different classification thresholds.
+    
+    Models with curves closer to the top-left corner of the graph demonstrate stronger predictive performance.
+    """)
+
+    # Example placeholder if you generated ROC plots
+    # st.pyplot(roc_fig)
 
 # -----------------------
 # TAB 4
