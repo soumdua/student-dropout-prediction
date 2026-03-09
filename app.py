@@ -83,53 +83,67 @@ with tab2:
 
     st.header("Descriptive Analytics")
 
-    st.write("This section explores patterns in the dataset to better understand factors associated with student dropout.")
+    st.markdown("""
+    This section explores patterns in the dataset to better understand the factors associated with student dropout.
+    Visualizing the data helps identify relationships between student characteristics and dropout outcomes.
+    """)
 
-    # Dropout distribution
+    # -----------------------------
+    # Dropout Distribution
+    # -----------------------------
     st.subheader("Dropout Distribution")
 
     fig, ax = plt.subplots()
     df["Dropout"].value_counts().plot(kind="bar", ax=ax)
+
     ax.set_xlabel("Dropout Status")
     ax.set_ylabel("Number of Students")
+    ax.set_title("Distribution of Student Dropout Outcomes")
 
     st.pyplot(fig)
 
     st.write("""
-    This chart shows the number of students who dropped out compared to those who remained enrolled. 
+    This bar chart shows the number of students who dropped out compared to those who remained enrolled. 
     Understanding this distribution helps determine whether the dataset is balanced and provides context for interpreting model performance.
     """)
 
-
-    # Age distribution
+    # -----------------------------
+    # Age Distribution
+    # -----------------------------
     st.subheader("Age Distribution")
 
     fig, ax = plt.subplots()
     sns.histplot(df["Age"], bins=20, kde=True, ax=ax)
 
+    ax.set_title("Distribution of Student Age")
+
     st.pyplot(fig)
 
     st.write("""
-    This histogram shows how student ages are distributed in the dataset. 
-    Examining the age distribution helps determine whether certain age groups may be more associated with dropout risk.
+    This histogram shows how student ages are distributed within the dataset. 
+    Identifying common age ranges can help determine whether age may be associated with different dropout patterns.
     """)
 
-
-    # Gender distribution
+    # -----------------------------
+    # Gender Distribution
+    # -----------------------------
     st.subheader("Gender Distribution")
 
     fig, ax = plt.subplots()
     df["Gender"].value_counts().plot(kind="bar", ax=ax)
 
+    ax.set_title("Gender Distribution")
+
     st.pyplot(fig)
 
     st.write("""
-    This plot shows the number of students in each gender category. 
-    Demographic distributions provide insight into whether the dataset is representative and whether gender differences may relate to dropout patterns.
+    This chart shows the number of students in each gender category represented in the dataset. 
+    Examining demographic distributions helps determine whether the dataset is balanced across gender groups.
     """)
 
-
-    # Study hours distribution
+    # -----------------------------
+    # Study Hours Distribution
+    # -----------------------------
     if "StudyHours" in df.columns:
 
         st.subheader("Study Hours Distribution")
@@ -137,76 +151,114 @@ with tab2:
         fig, ax = plt.subplots()
         sns.histplot(df["StudyHours"], bins=20, kde=True, ax=ax)
 
+        ax.set_title("Distribution of Study Hours")
+
         st.pyplot(fig)
 
         st.write("""
         This histogram shows how many hours students typically spend studying each week. 
-        Study habits can influence academic success and may help explain patterns in student retention or dropout.
+        Study habits may influence academic performance and could play an important role in predicting dropout risk.
         """)
 
+    # -----------------------------
+    # CGPA vs Dropout
+    # -----------------------------
+    if "CGPA" in df.columns:
 
-    # GPA distribution
-    if "GPA" in df.columns:
-
-        st.subheader("GPA Distribution")
+        st.subheader("CGPA vs Dropout")
 
         fig, ax = plt.subplots()
-        sns.histplot(df["GPA"], bins=20, kde=True, ax=ax)
+
+        sns.boxplot(
+            data=df,
+            x="Dropout",
+            y="CGPA",
+            ax=ax
+        )
+
+        ax.set_title("CGPA Distribution by Dropout Status")
 
         st.pyplot(fig)
 
         st.write("""
-        This plot shows the distribution of student grade point averages in the dataset. 
-        Academic performance is often a strong indicator of whether students remain enrolled or are at risk of dropping out.
+        This boxplot compares cumulative GPA between students who dropped out and those who remained enrolled. 
+        Lower CGPA values appear more frequently among students who dropped out, suggesting that academic performance may be an important predictor of retention.
         """)
 
+    # -----------------------------
+    # Attendance Rate vs Dropout
+    # -----------------------------
+    if "Attendance_Rate" in df.columns:
 
-    # Dropout by gender
-    if "Gender" in df.columns:
-
-        st.subheader("Dropout Rate by Gender")
+        st.subheader("Attendance Rate vs Dropout")
 
         fig, ax = plt.subplots()
-        sns.countplot(data=df, x="Gender", hue="Dropout", ax=ax)
+
+        sns.boxplot(
+            data=df,
+            x="Dropout",
+            y="Attendance_Rate",
+            ax=ax
+        )
+
+        ax.set_title("Attendance Rate by Dropout Status")
 
         st.pyplot(fig)
 
         st.write("""
-        This chart compares dropout outcomes across different gender groups. 
-        By examining these differences, we can identify whether certain demographic groups experience higher dropout rates.
+        This boxplot shows the relationship between student attendance rates and dropout outcomes. 
+        Students with lower attendance rates appear more likely to drop out, indicating that engagement in coursework may be strongly related to retention.
         """)
 
-
-    # Dropout by semester
+    # -----------------------------
+    # Dropout by Semester
+    # -----------------------------
     if "Semester_Year" in df.columns:
 
         st.subheader("Dropout by Semester Year")
 
         fig, ax = plt.subplots()
-        sns.countplot(data=df, x="Semester_Year", hue="Dropout", ax=ax)
+
+        sns.countplot(
+            data=df,
+            x="Semester_Year",
+            hue="Dropout",
+            ax=ax
+        )
+
+        ax.set_title("Dropout Distribution by Semester")
 
         st.pyplot(fig)
 
         st.write("""
-        This visualization shows how dropout outcomes vary across different stages of the academic program. 
-        It can reveal whether students are more likely to leave earlier or later in their academic journey.
+        This chart shows how dropout outcomes vary across different semesters in the academic program. 
+        It helps identify whether students are more likely to leave earlier in their studies or later in the program.
         """)
 
-
-    # Correlation heatmap
+    # -----------------------------
+    # Correlation Heatmap
+    # -----------------------------
     st.subheader("Correlation Heatmap")
 
-    numeric_df = df.select_dtypes(include=["int64","float64"])
+    numeric_df = df.select_dtypes(include=["int64", "float64"])
 
     fig, ax = plt.subplots(figsize=(10,6))
-    sns.heatmap(numeric_df.corr(), cmap="coolwarm", ax=ax)
+
+    sns.heatmap(
+        numeric_df.corr(),
+        cmap="coolwarm",
+        ax=ax
+    )
+
+    ax.set_title("Correlation Between Numerical Features")
 
     st.pyplot(fig)
 
     st.write("""
-    The correlation heatmap illustrates relationships between numerical features in the dataset. 
-    Strong positive or negative correlations may indicate variables that are important for predicting student dropout.
+    The correlation heatmap illustrates relationships between numerical variables in the dataset. 
+    Strong positive or negative correlations may indicate features that are important for predicting student dropout risk.
     """)
+
 # -----------------------
 # TAB 3
 # -----------------------
