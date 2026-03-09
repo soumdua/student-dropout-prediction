@@ -235,10 +235,23 @@ with tab4:
 
     st.header("Explainability & Interactive Prediction")
 
-    st.write("""
-    This section explains how the model makes predictions and allows users to test 
-    different student profiles to see how the predicted dropout risk changes.
-    """)
+st.markdown("""
+### Understanding Model Predictions
+
+Machine learning models can make accurate predictions, but it is equally important to understand **why** the model makes those predictions. In this section, explainability techniques are used to show how different student characteristics influence the model's decision when predicting dropout risk. This helps make the model more transparent and allows stakeholders to see which factors have the strongest impact on predictions.
+
+To provide this transparency, the app uses **SHAP (SHapley Additive exPlanations)**. SHAP is a widely used method for interpreting machine learning models because it assigns a contribution value to each feature in the dataset. These values show whether a feature increases or decreases the probability that a student will drop out. By visualizing these contributions, we can better understand how factors such as academic performance, attendance, or study habits affect the model’s predictions.
+
+### Interactive Prediction Tool
+
+This tab also includes an interactive prediction tool that allows users to experiment with different student profiles. By adjusting the input values using sliders or dropdown menus, users can simulate how changes in student characteristics affect the predicted dropout risk. For example, increasing study hours or improving attendance may reduce the predicted probability of dropping out.
+
+Once the inputs are selected, the model generates a real-time prediction showing whether the student is likely to remain enrolled or be at risk of dropping out. The app also displays the predicted probability associated with the outcome.
+
+### Explaining Individual Predictions
+
+After generating a prediction, a SHAP waterfall plot explains how each feature contributed to the model’s decision for that specific student profile. Features that push the prediction toward a higher dropout risk appear in red, while features that reduce the risk appear in blue. This visualization helps users understand which factors played the largest role in the prediction and provides insight into how the model evaluates student characteristics.
+""")
 
     # -----------------------------
     # Prepare data for SHAP
