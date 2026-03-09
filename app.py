@@ -167,35 +167,36 @@ with tab3:
 with tab4:
 
     st.header("Model Explainability (SHAP)")
-
-    st.write("This section explains which features most influence the dropout prediction.")
+    st.write("This section explains which features influence dropout prediction.")
 
     # Encode categorical variables
     df_encoded = pd.get_dummies(df)
 
-    # Get features used by the trained model
+    # Get features expected by the model
     feature_names = model.feature_names_in_
 
-    # Add missing columns if they do not exist
+    # Add missing columns expected by model
     for col in feature_names:
         if col not in df_encoded.columns:
             df_encoded[col] = 0
 
-    # Keep only columns used by the model
+    # Keep only model features
     X = df_encoded[feature_names]
 
-    try:
-        # Create SHAP explainer
-        explainer = shap.LinearExplainer(model, X)
+    # Convert everything to numeric
+    X = X.apply(pd.to_numeric, errors="coerce")
 
-        # Calculate SHAP values
+    # Fill NaN values
+    X = X.fillna(0)
+
+    try:
+
+        explainer = shap.LinearExplainer(model, X)
         shap_values = explainer(X)
 
-        # Create SHAP summary plot
         fig = plt.figure()
         shap.summary_plot(shap_values.values, X, show=False)
 
-        # Display in Streamlit
         st.pyplot(fig)
 
     except Exception as e:
