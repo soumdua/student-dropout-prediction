@@ -83,80 +83,62 @@ with tab2:
 
     st.header("Descriptive Analytics")
 
-    # -----------------------------
-    # Target Distribution
-    # -----------------------------
     st.subheader("Dropout Distribution")
 
     fig, ax = plt.subplots()
     df["Dropout"].value_counts().plot(kind="bar", ax=ax)
-    ax.set_title("Distribution of Student Dropout")
-    ax.set_xlabel("Dropout")
-    ax.set_ylabel("Count")
+    ax.set_title("Distribution of Student Dropout Outcomes")
+    ax.set_xlabel("Dropout Status")
+    ax.set_ylabel("Number of Students")
+
     st.pyplot(fig)
 
-    st.write("This plot shows how many students dropped out versus stayed enrolled.")
+    st.write("""
+    This bar chart shows the number of students who dropped out compared to those who remained enrolled. 
+    Understanding this distribution helps determine whether the dataset is balanced and whether the model may need to account for class imbalance when making predictions.
+    """)
 
-    # -----------------------------
-    # GPA vs Dropout
-    # -----------------------------
-    st.subheader("GPA vs Dropout")
+
+    st.subheader("Age Distribution")
 
     fig, ax = plt.subplots()
-    sns.boxplot(x="Dropout", y="GPA", data=df, ax=ax)
-    ax.set_title("GPA Distribution by Dropout Status")
+    sns.histplot(df["Age"], bins=20, kde=True, ax=ax)
+
     st.pyplot(fig)
 
-    st.write("Students with lower GPA appear more likely to drop out.")
+    st.write("""
+    This histogram shows the distribution of student ages in the dataset. 
+    It helps identify whether certain age groups are more common and whether age may be a relevant factor associated with dropout patterns.
+    """)
 
-    # -----------------------------
-    # Attendance vs Dropout
-    # -----------------------------
-    st.subheader("Attendance Rate vs Dropout")
+
+    st.subheader("Gender Distribution")
 
     fig, ax = plt.subplots()
-    sns.boxplot(x="Dropout", y="Attendance_Rate", data=df, ax=ax)
-    ax.set_title("Attendance Rate by Dropout Status")
+    df["Gender"].value_counts().plot(kind="bar", ax=ax)
+
     st.pyplot(fig)
 
-    st.write("Students with lower attendance rates show higher dropout probability.")
+    st.write("""
+    This chart shows the number of students in each gender category represented in the dataset. 
+    Examining demographic distributions helps determine whether the dataset represents students evenly and whether gender may influence dropout outcomes.
+    """)
 
-    # -----------------------------
-    # Study Hours vs Dropout
-    # -----------------------------
-    st.subheader("Study Hours per Day vs Dropout")
 
-    fig, ax = plt.subplots()
-    sns.boxplot(x="Dropout", y="Study_Hours_per_Day", data=df, ax=ax)
-    ax.set_title("Study Hours by Dropout Status")
-    st.pyplot(fig)
-
-    st.write("Students studying fewer hours per day tend to drop out more frequently.")
-
-    # -----------------------------
-    # Stress Index vs Dropout
-    # -----------------------------
-    st.subheader("Stress Index vs Dropout")
-
-    fig, ax = plt.subplots()
-    sns.boxplot(x="Dropout", y="Stress_Index", data=df, ax=ax)
-    ax.set_title("Stress Index by Dropout Status")
-    st.pyplot(fig)
-
-    st.write("Higher stress levels may be associated with higher dropout risk.")
-
-    # -----------------------------
-    # Correlation Heatmap
-    # -----------------------------
     st.subheader("Correlation Heatmap")
 
+    numeric_df = df.select_dtypes(include=["int64", "float64"])
+
     fig, ax = plt.subplots(figsize=(10,6))
-    sns.heatmap(df.select_dtypes("number").corr(),
-                cmap="coolwarm",
-                ax=ax)
+    sns.heatmap(numeric_df.corr(), cmap="coolwarm", ax=ax)
+
     st.pyplot(fig)
 
-    st.write("This heatmap shows relationships between numerical variables in the dataset.")
+    st.write("""
+    The correlation heatmap shows relationships between numerical variables in the dataset. 
+    Strong positive or negative correlations highlight features that may have meaningful relationships with student dropout or other academic characteristics.
+    """)
+
 # -----------------------
 # TAB 3
 # -----------------------
