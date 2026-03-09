@@ -235,27 +235,21 @@ with tab4:
 
     st.header("Explainability & Interactive Prediction")
 
-st.markdown("""
-### Understanding Model Predictions
+    st.markdown("""
+    ### Understanding Model Predictions
 
-Machine learning models can make accurate predictions, but it is equally important to understand **why** the model makes those predictions. In this section, explainability techniques are used to show how different student characteristics influence the model's decision when predicting dropout risk. This helps make the model more transparent and allows stakeholders to see which factors have the strongest impact on predictions.
+    Machine learning models can make accurate predictions, but it is equally important to understand **why** the model makes those predictions. In this section, explainability techniques are used to show how different student characteristics influence the model's decision when predicting dropout risk. This helps make the model more transparent and allows stakeholders to see which factors have the strongest impact on predictions.
 
-To provide this transparency, the app uses **SHAP (SHapley Additive exPlanations)**. SHAP is a widely used method for interpreting machine learning models because it assigns a contribution value to each feature in the dataset. These values show whether a feature increases or decreases the probability that a student will drop out. By visualizing these contributions, we can better understand how factors such as academic performance, attendance, or study habits affect the model’s predictions.
+    To provide this transparency, the app uses **SHAP (SHapley Additive exPlanations)**. SHAP assigns a contribution value to each feature in the dataset, indicating whether that feature increases or decreases the probability of dropout. By visualizing these contributions, we can better understand how factors such as academic performance, attendance, and study habits influence predictions.
 
-### Interactive Prediction Tool
+    ### Interactive Prediction Tool
 
-This tab also includes an interactive prediction tool that allows users to experiment with different student profiles. By adjusting the input values using sliders or dropdown menus, users can simulate how changes in student characteristics affect the predicted dropout risk. For example, increasing study hours or improving attendance may reduce the predicted probability of dropping out.
+    This tab also includes an interactive prediction tool that allows users to experiment with different student profiles. By adjusting the input values using sliders or dropdown menus, users can simulate how changes in student characteristics affect the predicted dropout risk. For example, increasing study hours or improving attendance may reduce the predicted probability of dropping out.
 
-Once the inputs are selected, the model generates a real-time prediction showing whether the student is likely to remain enrolled or be at risk of dropping out. The app also displays the predicted probability associated with the outcome.
+    After generating a prediction, a SHAP waterfall plot explains how each feature contributed to the model’s decision for that specific student profile. Features that push the prediction toward higher dropout risk appear in red, while features that reduce the risk appear in blue.
+    """)
 
-### Explaining Individual Predictions
-
-After generating a prediction, a SHAP waterfall plot explains how each feature contributed to the model’s decision for that specific student profile. Features that push the prediction toward a higher dropout risk appear in red, while features that reduce the risk appear in blue. This visualization helps users understand which factors played the largest role in the prediction and provides insight into how the model evaluates student characteristics.
-""")
-
-    # -----------------------------
     # Prepare data for SHAP
-    # -----------------------------
     df_encoded = pd.get_dummies(df)
 
     feature_names = model.feature_names_in_
@@ -269,43 +263,32 @@ After generating a prediction, a SHAP waterfall plot explains how each feature c
     explainer = shap.LinearExplainer(model, X)
     shap_values = explainer(X)
 
-    # -----------------------------
     # SHAP Summary Plot
-    # -----------------------------
     st.subheader("SHAP Summary Plot")
 
     fig = plt.figure()
     shap.summary_plot(shap_values.values, X, show=False)
-
     st.pyplot(fig)
 
     st.write("""
-    The SHAP summary plot shows which features most influence the model’s predictions 
-    across the entire dataset. Features at the top of the plot have the largest impact 
-    on whether the model predicts that a student will drop out.
+    The SHAP summary plot shows which features have the greatest influence on the model’s predictions across all students in the dataset. 
+    Features appearing at the top of the chart have the strongest overall impact on predicting dropout risk.
     """)
 
-    # -----------------------------
-    # SHAP Bar Importance Plot
-    # -----------------------------
+    # SHAP Feature Importance (Bar Plot)
     st.subheader("SHAP Feature Importance")
 
     fig = plt.figure()
     shap.plots.bar(shap_values, show=False)
-
     st.pyplot(fig)
 
     st.write("""
-    This bar chart ranks the features based on their overall importance to the model. 
-    The higher the bar, the greater the influence that feature has on predicting student dropout risk.
+    This bar chart ranks features according to their overall importance in the prediction model. 
+    Higher bars indicate features that play a larger role in determining whether a student is predicted to drop out.
     """)
 
-    # -----------------------------
     # Interactive Prediction
-    # -----------------------------
     st.subheader("Interactive Prediction")
-
-    st.write("Adjust the student characteristics below to see how the model prediction changes.")
 
     model_choice = st.selectbox(
         "Select Model",
@@ -333,9 +316,7 @@ After generating a prediction, a SHAP waterfall plot explains how each feature c
         int(df["Attendance_Rate"].mean())
     )
 
-    # -----------------------------
-    # Create input row
-    # -----------------------------
+    # Create input row starting from average values
     input_df = X.mean().to_frame().T
 
     input_df["Age"] = age
@@ -344,11 +325,8 @@ After generating a prediction, a SHAP waterfall plot explains how each feature c
 
     input_df = input_df[feature_names]
 
-    # -----------------------------
     # Make prediction
-    # -----------------------------
     prediction = model.predict(input_df)[0]
-
     probability = model.predict_proba(input_df)[0][1]
 
     st.subheader("Prediction Result")
@@ -358,20 +336,16 @@ After generating a prediction, a SHAP waterfall plot explains how each feature c
     else:
         st.success(f"Prediction: Student likely to remain enrolled (Probability: {probability:.2f})")
 
-    # -----------------------------
-    # SHAP explanation for user input
-    # -----------------------------
+    # SHAP explanation for the specific prediction
     st.subheader("SHAP Explanation for This Prediction")
 
     user_shap = explainer(input_df)
 
     fig = plt.figure()
-
     shap.plots.waterfall(user_shap[0], show=False)
-
     st.pyplot(fig)
 
     st.write("""
-    The SHAP waterfall plot explains how each feature contributed to this specific prediction. 
-    Features pushing the prediction toward dropout risk appear in red, while features that decrease the risk appear in blue.
+    The SHAP waterfall plot explains how each feature influenced the model’s prediction for this specific student profile. 
+    Red bars increase the predicted probability of dropout, while blue bars decrease the risk.
     """)
