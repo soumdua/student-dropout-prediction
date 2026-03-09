@@ -214,11 +214,31 @@ with tab2:
 with tab3:
 
     st.header("Model Performance")
+st.write("""
+This chart compares the accuracy of the machine learning models tested in this project. 
+Logistic Regression achieved the highest accuracy, slightly outperforming Random Forest and XGBoost, while Decision Tree produced the lowest performance among the evaluated models.
+""")
 
-    performance = pd.DataFrame({
-        "Model":["Logistic Regression","Decision Tree","Random Forest","MLP"],
-        "F1 Score":[0.82,0.75,0.80,0.78]
-    })
+   model_results = pd.DataFrame({
+    "Model": [
+        "Logistic Regression",
+        "Random Forest",
+        "XGBoost",
+        "Neural Network",
+        "Decision Tree"
+    ],
+    "Accuracy": [
+        0.8105,
+        0.8075,
+        0.7965,
+        0.7855,
+        0.7310
+    ]
+})
+
+st.subheader("Model Comparison")
+
+st.dataframe(model_results)
 
     st.table(performance)
 
