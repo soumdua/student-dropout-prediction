@@ -47,14 +47,31 @@ with tab1:
 
     st.header("Executive Summary")
 
-    st.write("""
-    This project predicts student dropout risk using academic,
-    behavioral, and demographic data.
+    st.markdown("""
+### Dataset and Prediction Task
 
-    Universities can identify at-risk students early and intervene
-    before dropout occurs.
-    """)
+This project analyzes a dataset containing information about university students and their academic and personal characteristics in order to predict whether a student is likely to drop out of their program. Each row in the dataset represents an individual student, while the columns represent features that describe aspects of the student’s background, behavior, and academic performance. These features include demographic attributes such as gender and age, academic information such as semester year and grades, and engagement indicators such as attendance, study hours, and participation in academic activities.
 
+The target variable in this analysis is **student dropout status**, which indicates whether a student continues their education or leaves the program before completing their degree. By examining patterns within the data, the model aims to classify students into two groups: those who are likely to remain enrolled and those who may be at risk of dropping out. The goal is to use the available features to identify factors that are associated with higher dropout risk and generate predictions that can help institutions better understand student retention.
+
+---
+
+### Why This Problem Matters
+
+Student dropout is an important issue for educational institutions because it affects both students and universities. When students leave their programs before graduating, they may experience financial loss, delayed career opportunities, and reduced long-term earning potential. For universities, high dropout rates can negatively impact graduation statistics, institutional reputation, and funding that may be tied to student success metrics.
+
+Predictive analytics provides a way for institutions to address this challenge proactively. Instead of waiting until students have already disengaged or failed courses, universities can use data to identify early warning signs. By detecting students who may be at risk, institutions can provide targeted support such as academic advising, tutoring, mentoring, or financial guidance. This type of data-driven intervention can help improve retention rates and support students in completing their education successfully.
+
+---
+
+### Approach and Key Findings
+
+To address the prediction task, the dataset was first explored and cleaned to ensure that all features were suitable for modeling. Categorical variables were encoded into numerical form so they could be used by the machine learning algorithm. Exploratory visualizations were created to better understand the relationships between features such as study habits, academic performance, and semester progression with student dropout outcomes.
+
+A **logistic regression classification model** was then trained to predict whether a student is likely to drop out. Logistic regression was chosen because it is interpretable and allows us to understand how different features influence the probability of dropout. The model produces predictions that estimate the likelihood of a student leaving their program based on the characteristics available in the dataset.
+
+To make the model more transparent and interpretable, **SHAP (SHapley Additive exPlanations)** was used to analyze which features contribute most strongly to the predictions. This helps translate the model’s results into insights that stakeholders can understand. Overall, the analysis demonstrates how student data can be used to identify patterns associated with dropout risk and highlights how predictive modeling can support earlier and more informed interventions aimed at improving student success and retention.
+""")
     st.write("Dataset shape:", df.shape)
 
 
