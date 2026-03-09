@@ -13,6 +13,12 @@ st.title("Student Dropout Prediction Dashboard")
 # Load dataset
 df = pd.read_csv("student_dropout_dataset_v3.csv")
 
+# Create encoded version for modeling and SHAP
+df_encoded = df.copy()
+
+for col in df_encoded.select_dtypes(include="object").columns:
+    df_encoded[col] = pd.factorize(df_encoded[col])[0]
+
 # Load trained model
 model = joblib.load("logistic_model.pkl")
 
@@ -57,7 +63,7 @@ with tab2:
     st.subheader("Correlation Heatmap")
 
     fig, ax = plt.subplots(figsize=(10,6))
-    sns.heatmap(df.select_dtypes(include="number").corr(), cmap="coolwarm", ax=ax)
+    sns.heatmap(df_encoded.corr(), cmap="coolwarm", ax=ax)
     st.pyplot(fig)
 
 with tab3:
@@ -82,8 +88,7 @@ with tab4:
 
     st.subheader("SHAP Feature Importance")
 
-    X = df.drop("Dropout", axis=1)
-    y = df["Dropout"]
+    X = df_encoded.drop("Dropout", axis=1)
 
     explainer = shap.LinearExplainer(model, X)
     shap_values = explainer(X)
@@ -119,6 +124,7 @@ with tab4:
     })
 
     if st.button("Predict"):
+
         prediction = model.predict(input_data)[0]
         probability = model.predict_proba(input_data)[0][1]
 
